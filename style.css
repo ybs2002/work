@@ -81,6 +81,10 @@ button {
 .list li.done span { text-decoration: line-through; color: #aaa; }
 
 /* ===== 주간 식단 (요일 카드) ===== */
+.plan-actions { display: flex; gap: 8px; margin-bottom: 12px; }
+.plan-actions button { flex: 1; }
+button.secondary { background: #eee; color: #666; }
+
 /* 폰: 카드 1줄에 1개 (세로로 쌓임) */
 .days { display: grid; grid-template-columns: 1fr; gap: 12px; }
 

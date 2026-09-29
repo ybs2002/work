@@ -127,6 +127,36 @@ function renderPlan() {
   });
 }
 
+// ----- 🪄 빈칸 자동 채우기 -----
+// 월요일 아침부터 차례대로, 비어 있는 칸만 추천 메뉴로 채워요.
+// 한 칸씩 채울 때마다 data.plan 에 바로 넣기 때문에,
+// 다음 칸을 추천할 때 "이미 들어간 메뉴"로 계산돼서 겹침이 줄어들어요.
+document.getElementById("auto-fill").addEventListener("click", () => {
+  if (data.menus.length === 0) {
+    alert("먼저 🍳 메뉴 탭에서 메뉴를 추가해 주세요!");
+    return;
+  }
+  DAYS.forEach((day) => {
+    MEALS.forEach((meal) => {
+      const key = `${day}-${meal}`;
+      if (!data.plan[key]) {
+        data.plan[key] = recommendMenu(key);
+      }
+    });
+  });
+  saveData();
+  renderPlan();
+});
+
+// ----- 🗑️ 모두 비우기 -----
+document.getElementById("clear-plan").addEventListener("click", () => {
+  if (!confirm("이번 주 식단을 모두 지울까요?")) return; // "취소"를 누르면 멈춰요
+  data.plan = {};
+  data.bought = [];
+  saveData();
+  renderPlan();
+});
+
 // ----- 메뉴 추천 -----
 // 좋은 후보부터 차례로 찾아요:
 //   1순위: 가족 모두 먹을 수 있고 + 이번 주에 아직 안 먹은 메뉴
