@@ -341,3 +341,9 @@ function renderAll() {
 }
 
 renderAll();
+
+// ----- 8. 오프라인 도우미(서비스 워커) 켜기 -----
+// 인터넷 주소(https)로 열었을 때만 작동해요. 파일을 더블클릭해서 열면 그냥 넘어가요.
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  navigator.serviceWorker.register("sw.js");
+}
