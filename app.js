@@ -270,25 +270,52 @@ document.getElementById("family-form").addEventListener("submit", (e) => {
 // ----- 6. 장보기 목록 -----
 
 function renderShopping() {
-  // 식단표에 들어간 메뉴들의 재료를 중복 없이 모으기
-  const needed = new Set();
+  // 재료마다 "몇 번 쓰이는지"와 "어느 메뉴에 들어가는지" 모으기
+  // 예: { "두부": { count: 3, menus: Set{"김치찌개", "된장국"} } }
+  const needed = {};
   Object.values(data.plan).forEach((menuName) => {
     const menu = data.menus.find((m) => m.name === menuName);
-    if (menu) menu.ingredients.forEach((food) => needed.add(food));
+    if (!menu) return;
+    menu.ingredients.forEach((food) => {
+      if (!needed[food]) needed[food] = { count: 0, menus: new Set() };
+      needed[food].count += 1;
+      needed[food].menus.add(menu.name);
+    });
   });
 
+  const foods = Object.keys(needed);
   const list = document.getElementById("shopping-list");
-  if (needed.size === 0) {
+  const progress = document.getElementById("shopping-progress");
+
+  if (foods.length === 0) {
+    progress.textContent = "";
     list.innerHTML = "<li>식단표에 메뉴를 먼저 넣어주세요 🙂</li>";
     return;
   }
 
-  list.innerHTML = [...needed]
+  // 순서 정하기:
+  //   ① 아직 안 산 재료가 위, 산 재료는 아래
+  //   ② 같은 그룹 안에서는 많이 쓰이는 재료가 위
+  const isBought = (food) => data.bought.includes(food);
+  foods.sort((a, b) => {
+    if (isBought(a) !== isBought(b)) return isBought(a) ? 1 : -1;
+    return needed[b].count - needed[a].count;
+  });
+
+  const boughtCount = foods.filter(isBought).length;
+  progress.textContent =
+    boughtCount === foods.length
+      ? `🎉 다 샀어요! (${foods.length}개)`
+      : `${foods.length}개 중 ${boughtCount}개 샀어요`;
+
+  list.innerHTML = foods
     .map((food) => {
-      const done = data.bought.includes(food);
+      const done = isBought(food);
+      const menus = [...needed[food].menus].join(", ");
       return `<li class="${done ? "done" : ""}">
         <label><input type="checkbox" data-food="${food}" ${done ? "checked" : ""}>
-        <span>${food}</span></label>
+        <span>${food}<small>${menus}</small></span></label>
+        <span class="count">${needed[food].count}번</span>
       </li>`;
     })
     .join("");

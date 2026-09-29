@@ -80,6 +80,18 @@ button {
 .list .delete { background: #eee; color: #666; padding: 6px 10px; }
 .list li.done span { text-decoration: line-through; color: #aaa; }
 
+/* ===== 장보기 ===== */
+.list label { display: flex; align-items: center; gap: 10px; flex: 1; font-size: 16px; }
+.list input[type="checkbox"] { width: 22px; height: 22px; flex-shrink: 0; }
+.list li.done { opacity: 0.6; }
+.count {
+  background: #fff0e8; color: #ff8a5b;
+  font-size: 13px; font-weight: bold;
+  padding: 2px 10px; border-radius: 10px;
+  flex-shrink: 0;
+}
+.progress { font-weight: bold; color: #ff8a5b; }
+
 /* ===== 주간 식단 (요일 카드) ===== */
 .plan-actions { display: flex; gap: 8px; margin-bottom: 12px; }
 .plan-actions button { flex: 1; }
