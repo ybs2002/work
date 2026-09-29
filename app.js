@@ -157,11 +157,26 @@ document.getElementById("clear-plan").addEventListener("click", () => {
   renderPlan();
 });
 
+// ----- 바로 앞·뒤 끼니 찾기 -----
+// 21칸을 한 줄로 세우면: 월-아침, 월-점심, 월-저녁, 화-아침, ... 일-저녁
+const ALL_SLOTS = DAYS.flatMap((day) => MEALS.map((meal) => `${day}-${meal}`));
+
+// 이 칸의 바로 앞 칸과 바로 뒤 칸에 들어있는 메뉴 이름들
+// (예: "화-아침" → "월-저녁" 과 "화-점심" 의 메뉴)
+function neighborMenus(key) {
+  const i = ALL_SLOTS.indexOf(key);
+  return [ALL_SLOTS[i - 1], ALL_SLOTS[i + 1]] // 맨 앞/맨 뒤 칸이면 undefined 가 들어가요
+    .map((k) => data.plan[k])
+    .filter((name) => name); // 비어 있는 칸은 빼요
+}
+
 // ----- 메뉴 추천 -----
 // 좋은 후보부터 차례로 찾아요:
 //   1순위: 가족 모두 먹을 수 있고 + 이번 주에 아직 안 먹은 메뉴
-//   2순위: 가족 모두 먹을 수 있는 메뉴
-//   3순위: 아무 메뉴나
+//   2순위: 가족 모두 먹을 수 있고 + 바로 앞·뒤 끼니와 다른 메뉴
+//   3순위: 가족 모두 먹을 수 있는 메뉴
+//   4순위: 바로 앞·뒤 끼니와 다른 메뉴
+//   5순위: 아무 메뉴나
 // 그 안에서 랜덤으로 하나를 골라요.
 function recommendMenu(currentKey) {
   // 이번 주 식단에 이미 들어간 메뉴들 (지금 바꾸려는 칸은 빼고)
@@ -169,12 +184,21 @@ function recommendMenu(currentKey) {
     .filter(([key]) => key !== currentKey)
     .map(([, menuName]) => menuName);
 
+  const neighbors = neighborMenus(currentKey);
+  const notNeighbor = (name) => !neighbors.includes(name);
+
   const allNames = data.menus.map((m) => m.name);
   const everyoneCanEat = allNames.filter((name) => whoCantEat(name).length === 0);
   const notEatenYet = everyoneCanEat.filter((name) => !usedThisWeek.includes(name));
 
   // 후보가 있는 첫 번째 목록을 골라요
-  const candidates = [notEatenYet, everyoneCanEat, allNames].find((list) => list.length > 0);
+  const candidates = [
+    notEatenYet,
+    everyoneCanEat.filter(notNeighbor),
+    everyoneCanEat,
+    allNames.filter(notNeighbor),
+    allNames,
+  ].find((list) => list.length > 0);
   if (!candidates) return null; // 메뉴가 하나도 없을 때
 
   // 0 ~ (개수-1) 사이의 랜덤 숫자로 하나 뽑기
