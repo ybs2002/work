@@ -66,36 +66,44 @@ function whoCantEat(menuName) {
     .map((person) => person.name);
 }
 
+// 오늘이 무슨 요일인지 알려줘요 ("월" ~ "일")
+// getDay() 는 일요일=0, 월요일=1 ... 토요일=6 이라서 순서를 맞춰 줘요
+function todayName() {
+  return DAYS[(new Date().getDay() + 6) % 7];
+}
+
 function renderPlan() {
-  const table = document.getElementById("plan-table");
+  const box = document.getElementById("plan-days");
+  const today = todayName();
 
-  // 제목 줄: 빈칸 + 월~일
-  let html = "<tr><th></th>" + DAYS.map((d) => `<th>${d}</th>`).join("") + "</tr>";
-
-  // 아침/점심/저녁 줄
-  MEALS.forEach((meal) => {
-    html += `<tr><th>${meal}</th>`;
-    DAYS.forEach((day) => {
+  // 요일마다 카드 1개씩 만들기
+  box.innerHTML = DAYS.map((day) => {
+    // 카드 안에 아침/점심/저녁 한 줄씩
+    const rows = MEALS.map((meal) => {
       const key = `${day}-${meal}`;
       const chosen = data.plan[key] || "";
       const options = data.menus
         .map((m) => `<option ${m.name === chosen ? "selected" : ""}>${m.name}</option>`)
         .join("");
       const cant = whoCantEat(chosen);
-      const warning = cant.length ? `<div class="warn">⚠️ ${cant.join(", ")}</div>` : "";
-      html += `<td>
-        <select data-key="${key}">
-          <option value="">-</option>${options}
-        </select>${warning}
-      </td>`;
-    });
-    html += "</tr>";
-  });
+      const warning = cant.length ? `<div class="warn">⚠️ ${cant.join(", ")} 못 먹어요</div>` : "";
+      return `<div class="meal-row">
+          <label>${meal}</label>
+          <select data-key="${key}">
+            <option value="">- 선택 -</option>${options}
+          </select>
+        </div>${warning}`;
+    }).join("");
 
-  table.innerHTML = html;
+    const isToday = day === today;
+    return `<div class="day-card ${isToday ? "today" : ""}">
+        <h3>${day}요일${isToday ? '<span class="today-badge">오늘</span>' : ""}</h3>
+        ${rows}
+      </div>`;
+  }).join("");
 
   // 메뉴를 고르면 저장하고 다시 그리기
-  table.querySelectorAll("select").forEach((select) => {
+  box.querySelectorAll("select").forEach((select) => {
     select.addEventListener("change", () => {
       data.plan[select.dataset.key] = select.value;
       saveData();
