@@ -1,0 +1,89 @@
+/* ===== 기본 설정 ===== */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  background: #fdf8f3;
+  color: #333;
+}
+
+/* ===== 상단 제목 + 탭 ===== */
+header {
+  background: #ff8a5b;
+  color: white;
+  padding: 16px;
+}
+header h1 { margin: 0 0 12px; font-size: 22px; }
+
+nav { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.tab {
+  border: none;
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.tab.active { background: white; color: #ff8a5b; font-weight: bold; }
+
+/* ===== 본문 ===== */
+main { padding: 16px; max-width: 900px; margin: 0 auto; }
+
+.page { display: none; }          /* 기본은 숨김 */
+.page.active { display: block; }  /* 선택된 탭만 보이기 */
+
+.hint { color: #888; font-size: 14px; }
+
+/* ===== 입력 폼 ===== */
+.card {
+  background: white;
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+input, select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+}
+button {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #ff8a5b;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* ===== 목록 ===== */
+.list { list-style: none; padding: 0; }
+.list li {
+  background: white;
+  margin-top: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+.list small { color: #888; display: block; }
+.list .delete { background: #eee; color: #666; padding: 6px 10px; }
+.list li.done span { text-decoration: line-through; color: #aaa; }
+
+/* ===== 주간 식단표 ===== */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; background: white; }
+th, td { border: 1px solid #eee; padding: 6px; text-align: center; }
+th { background: #fff0e8; }
+td select { width: 100%; min-width: 90px; font-size: 13px; padding: 6px; }
+.warn { color: #d9534f; font-size: 12px; }
