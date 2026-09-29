@@ -92,6 +92,7 @@ function renderPlan() {
           <select data-key="${key}">
             <option value="">- 선택 -</option>${options}
           </select>
+          <button class="dice" data-key="${key}" title="메뉴 추천">🎲</button>
         </div>${warning}`;
     }).join("");
 
@@ -110,6 +111,45 @@ function renderPlan() {
       renderPlan();
     });
   });
+
+  // 🎲 버튼을 누르면 추천 메뉴로 채우기
+  box.querySelectorAll(".dice").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const menuName = recommendMenu(btn.dataset.key);
+      if (!menuName) {
+        alert("먼저 🍳 메뉴 탭에서 메뉴를 추가해 주세요!");
+        return;
+      }
+      data.plan[btn.dataset.key] = menuName;
+      saveData();
+      renderPlan();
+    });
+  });
+}
+
+// ----- 메뉴 추천 -----
+// 좋은 후보부터 차례로 찾아요:
+//   1순위: 가족 모두 먹을 수 있고 + 이번 주에 아직 안 먹은 메뉴
+//   2순위: 가족 모두 먹을 수 있는 메뉴
+//   3순위: 아무 메뉴나
+// 그 안에서 랜덤으로 하나를 골라요.
+function recommendMenu(currentKey) {
+  // 이번 주 식단에 이미 들어간 메뉴들 (지금 바꾸려는 칸은 빼고)
+  const usedThisWeek = Object.entries(data.plan)
+    .filter(([key]) => key !== currentKey)
+    .map(([, menuName]) => menuName);
+
+  const allNames = data.menus.map((m) => m.name);
+  const everyoneCanEat = allNames.filter((name) => whoCantEat(name).length === 0);
+  const notEatenYet = everyoneCanEat.filter((name) => !usedThisWeek.includes(name));
+
+  // 후보가 있는 첫 번째 목록을 골라요
+  const candidates = [notEatenYet, everyoneCanEat, allNames].find((list) => list.length > 0);
+  if (!candidates) return null; // 메뉴가 하나도 없을 때
+
+  // 0 ~ (개수-1) 사이의 랜덤 숫자로 하나 뽑기
+  const randomIndex = Math.floor(Math.random() * candidates.length);
+  return candidates[randomIndex];
 }
 
 // ----- 4. 메뉴 관리 -----
